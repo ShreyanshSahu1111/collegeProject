@@ -1,1 +1,1 @@
-basePath = ".\\images\\"
+basePath = "./images/"
