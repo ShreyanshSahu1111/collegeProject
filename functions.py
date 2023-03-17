@@ -37,14 +37,24 @@ def colShift(img, password):
         img[:, c] = np.roll(img[:, c], -shift)
 
 def encryptImage(inputFileName, outputFileName):
+    
+    img = load_image(inputFileName)
+    
+    password = generatePassword(img)
+
+    rowShift(img, password)
+    colShift(img, password)
+    
+    for num in password:
+        offset = 0
+        offset = (offset+int(num))%8
+    
+
     def rotateBits(n):
-        offset = 5
+        nonlocal offset
         n = '{0:08b}'.format(n)
         n = n[offset:]+n[:offset]
         return int(n,2)
-    img = load_image(inputFileName)
-    password = generatePassword(img)
-    rowShift(img, password)
-    colShift(img, password)
+    
     result = np.vectorize(rotateBits)(img)
     save_image(result, basePath+outputFileName)

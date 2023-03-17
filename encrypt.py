@@ -1,7 +1,7 @@
 from functions import *
 from constants import *
 
-inputFileName = "trial-image.jpg"
+inputFileName = "outputImage0.jpg"
 outputFileName1 = "outputImage1.jpg"
 outputFileName2 = "outputImage2.jpg"
 outputFileName3 = "outputImage3.jpg"
