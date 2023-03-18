@@ -8,6 +8,8 @@ def load_image(filename):
     img = Image.open(filename).convert('L')
     img.load()
     data = np.asarray(img, dtype="int32")
+    print(data.shape)
+    print(data)
     return data
 
 
