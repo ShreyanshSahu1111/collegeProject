@@ -4,7 +4,6 @@ from random import randrange
 from constants import *
 
 
-
 def load_image(filename):
     img = Image.open(filename).convert('L')
     img.load()
@@ -17,44 +16,137 @@ def save_image(npdata, outfilename):
                           "L")
     img.save(outfilename)
 
-def generatePassword(img:np.ndarray):
-    m,n = img.shape
+
+def generatePassword(img: np.ndarray):
+    m, n = img.shape
     password = ""
-    for _ in range(m+n):
-        password += str(randrange(0,10))
+    for _ in range(m + n):
+        password += str(randrange(0, 10))
     return password
 
-def rowShift(img, password):
-    m, n = img.shape
-    for r in range(0,m):
-        shift = int(password[r])
-        img[r,:] = np.roll(img[r,:], -shift)
 
-def colShift(img, password):
+def rowShiftEncrypt(img, password):
     m, n = img.shape
-    for c in range(0,n):
-        shift = int(password[c+m])
+    for r in range(0, m):
+        shift = int(password[r])
+        img[r, :] = np.roll(img[r, :], -shift)
+
+
+def colShiftEncrypt(img, password):
+    m, n = img.shape
+    for c in range(0, n):
+        shift = int(password[c + m])
         img[:, c] = np.roll(img[:, c], -shift)
 
+
+def rowShiftDecrypt(img, password):
+    m, n = img.shape
+    for r in range(0, m):
+        shift = int(password[r])
+        img[r, :] = np.roll(img[r, :], shift)
+
+
+def colShiftDecrypt(img, password):
+    m, n = img.shape
+    for c in range(0, n):
+        shift = int(password[c + m])
+        img[:, c] = np.roll(img[:, c], shift)
+
+
 def encryptImage(inputFileName, outputFileName):
-    
+
     img = load_image(inputFileName)
-    
+
+    # print("=============normal=============")
+    # print(img)
+
     password = generatePassword(img)
 
-    rowShift(img, password)
-    colShift(img, password)
-    
+    rowShiftEncrypt(img, password)
+    colShiftEncrypt(img, password)
+
     for num in password:
         offset = 0
-        offset = (offset+int(num))%8
-    
+        offset = (offset + int(num)) % 8
 
-    def rotateBits(n):
+    def rotateBitsEncrypt(n):
         nonlocal offset
         n = '{0:08b}'.format(n)
-        n = n[offset:]+n[:offset]
-        return int(n,2)
+        n = n[offset:] + n[:offset]
+        return int(n, 2)
+
+    # print('{0:08b}'.format(img[0, 0]))
+    encryptedImage = np.vectorize(rotateBitsEncrypt)(img)
+    # print('{0:08b}'.format(encryptedImage[0, 0]))
+
+    # print("=============encrypted=============")
+    # print(encryptedImage)
+    save_image(encryptedImage, basePath + outputFileName)
+
+    return password, encryptedImage
+
+
+def decryptImage(inputFileName, outputFileName, password):
+
+    img = load_image(inputFileName)
+
+    print("=============encrypted=============")
+    print(img)
+
+    for num in password:
+        offset = 0
+        offset = (offset + int(num)) % 8
+        offset = 8 - offset
+
+    def rotateBitsDecrypt(n):
+        nonlocal offset
+        n = '{0:08b}'.format(n)
+        n = n[offset:] + n[:offset]
+        return int(n, 2)
+
     
-    result = np.vectorize(rotateBits)(img)
-    save_image(result, basePath+outputFileName)
+    # print('{0:08b}'.format(img[0, 0]))
+
+    img = np.vectorize(rotateBitsDecrypt)(img)
+    # print('{0:08b}'.format(img[0, 0]))
+
+    print("=============decrypted=============")
+    print(img)
+
+    # colShiftDecrypt(img, password)
+    # rowShiftDecrypt(img, password)
+
+    save_image(img, basePath + outputFileName)
+
+
+def decryptImageFromArray(img, outputFileName, password):
+
+    
+
+    # print("=============encrypted=============")
+    # print(img)
+
+    for num in password:
+        offset = 0
+        offset = (offset + int(num)) % 8
+        offset = 8 - offset
+
+    def rotateBitsDecrypt(n):
+        nonlocal offset
+        n = '{0:08b}'.format(n)
+        n = n[offset:] + n[:offset]
+        return int(n, 2)
+
+    
+    # print('{0:08b}'.format(img[0, 0]))
+
+    img = np.vectorize(rotateBitsDecrypt)(img)
+    # print('{0:08b}'.format(img[0, 0]))
+
+    # print("=============decrypted=============")
+    # print(img)
+
+    colShiftDecrypt(img, password)
+    rowShiftDecrypt(img, password)
+
+    save_image(img, basePath + outputFileName)
