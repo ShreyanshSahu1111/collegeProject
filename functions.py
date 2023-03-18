@@ -8,8 +8,8 @@ def load_image(filename):
     img = Image.open(filename).convert('L')
     img.load()
     data = np.asarray(img, dtype="int32")
-    print(data.shape)
-    print(data)
+    # print(data.shape)
+    # print(data)
     return data
 
 
@@ -152,3 +152,5 @@ def decryptImageFromArray(img, outputFileName, password):
     rowShiftDecrypt(img, password)
 
     save_image(img, basePath + outputFileName)
+
+    return img
